@@ -15,13 +15,9 @@ import java.util.List;
 public class AlertController {
     private final AlertService alertService;
 
-    @PostMapping
-    public ResponseEntity<AlertDTO> createAlert(@RequestBody AlertDTO alertDTO) {
-        return ResponseEntity.ok(alertService.createAlert(alertDTO));
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<AlertDTO>> getUserAlerts(@PathVariable Long userId) {
-        return ResponseEntity.ok(alertService.getAlertsByUserId(userId));
+    @PostMapping("/check-weather")
+    public ResponseEntity<String> checkWeatherAlerts() {
+        alertService.checkWeatherAlerts();
+        return ResponseEntity.ok("Verificação de tempestades concluída!");
     }
 }

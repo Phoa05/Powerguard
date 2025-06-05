@@ -19,46 +19,21 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AlertServiceImpl implements AlertService {
-
     private final AlertRepository alertRepository;
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
+    private final WeatherAlertService weatherAlertService;
 
     @Override
     @Transactional
-    public AlertDTO createAlert(AlertDTO alertDTO) {
-        User user = userRepository.findById(alertDTO.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + alertDTO.getUserId()));
-
-        Alert alert = modelMapper.map(alertDTO, Alert.class);
-        alert.setUser(user);
-        alert.setTimestamp(LocalDateTime.now());
-        alert.setAcknowledged(false);
-
-        Alert savedAlert = alertRepository.save(alert);
-        return modelMapper.map(savedAlert, AlertDTO.class);
+    public void checkWeatherAlerts() {
+        userRepository.findAll().forEach(user -> {
+            if (weatherAlertService.hasStormAlert(user.getCity())) {
+                Alert alert = new Alert();
+                alert.setUser(user);
+                alert.setMessage("ALERTA: Tempestade forte prevista em " + user.getCity());
+                alert.setTimestamp(LocalDateTime.now());
+                alertRepository.save(alert);
+            }
+        });
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<AlertDTO> getAlertsByUserId(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-
-        return alertRepository.findByUser(user).stream()
-                .map(alert -> modelMapper.map(alert, AlertDTO.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
-    public AlertDTO acknowledgeAlert(Long alertId) {
-        Alert alert = alertRepository.findById(alertId)
-                .orElseThrow(() -> new EntityNotFoundException("Alert not found with id: " + alertId));
-
-        alert.setAcknowledged(true);
-        Alert updatedAlert = alertRepository.save(alert);
-        return modelMapper.map(updatedAlert, AlertDTO.class);
-    }
-
 }
