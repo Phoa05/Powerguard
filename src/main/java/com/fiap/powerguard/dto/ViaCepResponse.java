@@ -5,18 +5,17 @@ import lombok.Data;
 
 @Data
 public class ViaCepResponse {
+    @JsonProperty("cep")
     private String cep;
+
+    @JsonProperty("logradouro")
     private String logradouro;
-    private String complemento;
-    private String bairro;
 
     @JsonProperty("localidade")
-    private String localidade;
+    private String cidade;
 
     @JsonProperty("uf")
     private String estado;
-    private String ibge;
-    private String gia;
-    private String ddd;
-    private String siafi;
+
+    private boolean erro;
 }
