@@ -1,12 +1,19 @@
 package com.fiap.powerguard.repository;
 
-import com.fiap.powerguard.model.User;
+import com.fiap.powerguard.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByCpf(String cpf);
+
     Optional<User> findByEmail(String email);
-    List<User> findByCity(String city);
+
+    boolean existsByCpf(String cpf);
+
+    boolean existsByEmail(String email);
 }

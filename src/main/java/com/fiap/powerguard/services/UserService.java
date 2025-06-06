@@ -1,9 +1,10 @@
 package com.fiap.powerguard.services;
 
-import com.fiap.powerguard.dto.UserDTO;
-
-import java.util.List;
+import com.fiap.powerguard.dtos.UserDTO;
+import com.fiap.powerguard.models.User;
 
 public interface UserService {
-    UserDTO createUser(UserDTO userDTO);
+    User cadastrarUsuario(UserDTO userDTO);
+    User buscarUsuarioPorId(Long id);
+    User buscarUsuarioPorCpf(String cpf);
 }
