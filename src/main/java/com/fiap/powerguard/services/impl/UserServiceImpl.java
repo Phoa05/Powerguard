@@ -1,5 +1,8 @@
 package com.fiap.powerguard.services.impl;
 
+import com.fiap.powerguard.exceptions.cep.CepNaoEncontradoException;
+import com.fiap.powerguard.exceptions.usuario.UsuarioExistenteException;
+import com.fiap.powerguard.exceptions.usuario.UsuarioNotFoundException;
 import com.fiap.powerguard.dtos.UserDTO;
 import com.fiap.powerguard.dtos.ViaCepResponse;
 import com.fiap.powerguard.models.User;
@@ -20,14 +23,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public User cadastrarUsuario(UserDTO userDTO) {
         if (userRepository.existsByCpf(userDTO.getCpf())) {
-            throw new RuntimeException("CPF já cadastrado");
+            throw new UsuarioExistenteException("CPF já cadastrado");
         }
 
         if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new RuntimeException("Email já cadastrado");
+            throw new UsuarioExistenteException("Email já cadastrado");
         }
 
         ViaCepResponse endereco = viaCepService.buscarEnderecoPorCep(userDTO.getCep()).block();
+
+        if (endereco.getLogradouro() == null || endereco.getComplemento() == null ||
+                endereco.getBairro() == null || endereco.getLocalidade() == null || endereco.getUf() == null){
+            throw new CepNaoEncontradoException("CEP não encontrado");
+        }
 
         User user = new User();
         user.setNome(userDTO.getNome());
@@ -50,12 +58,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public User buscarUsuarioPorId(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado"));
     }
 
     @Override
     public User buscarUsuarioPorCpf(String cpf) {
         return userRepository.findByCpf(cpf)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado"));
     }
 }

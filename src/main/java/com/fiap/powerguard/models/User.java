@@ -3,6 +3,7 @@ package com.fiap.powerguard.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "usuarios")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,7 @@
 package com.fiap.powerguard.services.impl;
 
+import com.fiap.powerguard.exceptions.queda.QuedaNotFoundException;
+import com.fiap.powerguard.exceptions.usuario.UsuarioNotFoundException;
 import com.fiap.powerguard.dtos.QuedaEnergiaDTO;
 import com.fiap.powerguard.models.QuedaEnergia;
 import com.fiap.powerguard.models.User;
@@ -27,7 +29,7 @@ public class QuedaEnergiaServiceImpl implements QuedaEnergiaService {
     @Override
     public QuedaEnergia reportarQueda(QuedaEnergiaDTO quedaDTO) {
         User user = userRepository.findById(quedaDTO.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuário não encontrado"));
 
         QuedaEnergia queda = new QuedaEnergia();
         queda.setDataHoraInicio(quedaDTO.getDataHoraInicio() != null ?
@@ -36,14 +38,19 @@ public class QuedaEnergiaServiceImpl implements QuedaEnergiaService {
         queda.setDescricao(quedaDTO.getDescricao());
         queda.setUser(user);
         queda.setCepAfetado(quedaDTO.getCepAfetado());
-        queda.setStatus("reportada"); // Status inicial
+        queda.setStatus("reportada");
 
         return quedaEnergiaRepository.save(queda);
     }
 
     @Override
     public List<QuedaEnergia> buscarPorCep(String cep) {
-        return quedaEnergiaRepository.findByCepAfetado(cep);
+        List<QuedaEnergia> listaPorCep = quedaEnergiaRepository.findByCepAfetado(cep);
+
+        if(listaPorCep.isEmpty()){
+            throw new QuedaNotFoundException("Não foram encontradas quedas para este cep");
+        }
+        return listaPorCep;
     }
 
     @Override
@@ -59,7 +66,7 @@ public class QuedaEnergiaServiceImpl implements QuedaEnergiaService {
     @Override
     public QuedaEnergia atualizarStatus(Long id, String status) {
         QuedaEnergia queda = quedaEnergiaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Queda de energia não encontrada"));
+                .orElseThrow(() -> new QuedaNotFoundException("Queda de energia não encontrada"));
 
         queda.setStatus(status);
 
